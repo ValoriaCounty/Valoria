@@ -1,0 +1,5 @@
+<meta>
+    <info author="VALORIA" name="valoria-store" version="1.0.0" type="script"/>
+    <script src="config.lua" type="server"/>
+    <script src="server.lua" type="server"/>
+</meta>
