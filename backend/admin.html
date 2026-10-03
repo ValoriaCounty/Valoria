@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VALORIA Admin</title>
+<style>
+body{margin:0;background:#080808;color:#fff;font-family:Arial,sans-serif;padding:30px}
+.box{max-width:1100px;margin:auto;background:#111;border:1px solid #333;border-radius:18px;padding:24px}
+input,button,select{padding:12px;border-radius:10px;border:1px solid #333;background:#090909;color:#fff}
+button{cursor:pointer;background:#e50914;border:0;font-weight:700}.row{border:1px solid #292929;border-radius:14px;padding:16px;margin:12px 0}
+.actions{display:flex;gap:8px;margin-top:12px}.ok{background:#159447}.bad{background:#a51c30}
+small{color:#aaa}
+</style></head><body><div class="box">
+<h1>VALORIA STORE — Admin</h1>
+<div id="login"><input id="email" type="email" placeholder="إيميل الأدمن"><input id="password" type="password" placeholder="كلمة المرور"><button onclick="login()">دخول</button></div>
+<div id="app" hidden><h2>الطلبات</h2><button onclick="loadOrders()">تحديث</button><div id="orders"></div></div>
+</div>
+<script>
+let token='';
+async function login(){
+ const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email.value,password:password.value})});
+ const d=await r.json(); if(!r.ok)return alert(d.message); token=d.token; document.getElementById('login').hidden=true; document.getElementById('app').hidden=false; loadOrders();
+}
+async function loadOrders(){
+ const r=await fetch('/api/admin/orders',{headers:{Authorization:'Bearer '+token}}); const data=await r.json();
+ orders.innerHTML=data.map(o=>`<div class="row"><b>${o.order_id}</b> — ${o.status}<br>
+ <small>الحساب: ${o.account_name} | الشخصية: ${o.character_name}<br>الإيميل: ${o.website_email}<br>الدفع: ${o.payment_method} | العملية: ${o.transaction_id}<br>الإجمالي: ${o.total_amount} ${o.currency}</small>
+ <div class="actions">${o.status==='PENDING'?`<button class="ok" onclick="setStatus('${o.order_id}','APPROVED')">قبول بعد التأكد من التحويل</button><button class="bad" onclick="setStatus('${o.order_id}','REJECTED')">رفض</button>`:''}</div></div>`).join('');
+}
+async function setStatus(id,status){
+ const r=await fetch('/api/admin/orders/'+encodeURIComponent(id)+'/status',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({status})});
+ const d=await r.json(); if(!r.ok)return alert(d.message); loadOrders();
+}
+</script></body></html>
