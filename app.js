@@ -1,7 +1,7 @@
 const all = window.VALORIA_PRODUCTS || [];
 let selected = 'الكل';
 let cart = JSON.parse(localStorage.getItem('VALORIA_CART') || '[]');
-const API = localStorage.getItem('VALORIA_API') || window.VALORIA_API || 'https://YOUR-BACKEND-DOMAIN';
+const API = 'http://135.125.190.186:3055';
 
 const categoryOrder = ['الكل','مركبات','خدمات','رصيد','عضويات'];
 const present = [...new Set(all.map(p=>p.category).filter(Boolean))];
