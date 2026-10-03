@@ -1,0 +1,19 @@
+VALORIA STORE — تشغيل حقيقي بدون قاعدة بيانات (مرحلة أولى)
+
+Admin email: Alone@admin.com
+
+1) على الـVPS ثبّت Node.js LTS.
+2) افتح مجلد backend.
+3) npm install
+4) npm start
+أو باستخدام PM2:
+   npm install -g pm2
+   pm2 start ecosystem.config.cjs
+   pm2 save
+
+5) اربط دومين/ساب دومين بالـVPS واجعل HTTPS أمام الـBackend.
+6) في GitHub Pages غيّر VALORIA_API في localStorage إلى رابط الـBackend، أو عدّل السطر في app.js.
+
+الموقع الآن يحفظ الطلبات فعليًا في backend/orders.json ويعطي كل طلب رقمًا وحالة PENDING، والأدمن يستطيع عبر API تغيير الحالة إلى PAID أو REJECTED.
+
+لا يوجد إرسال بريد تلقائي في هذه النسخة لأن إرسال البريد يحتاج SMTP حقيقي. لا تستخدم كلمة مرور البريد نفسها إلا إذا كنت متأكدًا أنها بيانات SMTP صحيحة. عند إعطاء بيانات SMTP يمكن إضافة الإشعار بالبريد دون وضعها على GitHub.
