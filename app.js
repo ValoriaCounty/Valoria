@@ -1,7 +1,7 @@
 const all = window.VALORIA_PRODUCTS || [];
 let selected = 'الكل';
 let cart = JSON.parse(localStorage.getItem('VALORIA_CART') || '[]');
-const API = localStorage.getItem('VALORIA_API') || 'https://YOUR-BACKEND-DOMAIN';
+const API = localStorage.getItem('VALORIA_API') || window.VALORIA_API || 'https://YOUR-BACKEND-DOMAIN';
 
 const categoryOrder = ['الكل','مركبات','خدمات','رصيد','عضويات'];
 const present = [...new Set(all.map(p=>p.category).filter(Boolean))];
@@ -48,9 +48,25 @@ document.getElementById('closeCart').onclick=()=>document.getElementById('cartMo
 document.getElementById('closeCheckout').onclick=()=>document.getElementById('checkoutModal').classList.add('hidden');
 document.getElementById('checkoutBtn').onclick=()=>{if(!cart.length)return alert('السلة فارغة');document.getElementById('cartModal').classList.add('hidden');document.getElementById('checkoutModal').classList.remove('hidden');};
 
+
+document.getElementById('verifyAccountBtn').onclick=async ()=>{
+ const email=document.getElementById('buyerEmail').value.trim();
+ const mtaAccount=document.getElementById('mtaAccount').value.trim();
+ const sel=document.getElementById('characterId');
+ if(!email||!mtaAccount) return alert('اكتب الإيميل واسم حساب MTA أولاً');
+ try{
+   const r=await fetch(API+'/api/account/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,mtaAccount})});
+   const d=await r.json();
+   if(!r.ok) throw new Error(d.message||'تعذر التحقق');
+   sel.innerHTML='<option value="">اختار الشخصية</option>'+d.characters.map(c=>`<option value="${c.id}">${c.charactername}</option>`).join('');
+   sel.disabled=false;
+   document.getElementById('checkoutMsg').textContent='✅ تم التحقق من حساب اللعبة.';
+ }catch(err){sel.innerHTML='<option value="">فشل التحقق</option>';sel.disabled=true;document.getElementById('checkoutMsg').textContent='❌ '+err.message;}
+};
+
 document.getElementById('checkoutForm').onsubmit=async e=>{
  e.preventDefault();
- const data={email:buyerEmail.value.trim(),mtaAccount:mtaAccount.value.trim(),paymentMethod:paymentMethod.value,transactionId:transactionId.value.trim(),products:cart.map(p=>({id:p.id,name:p.name,price:p.price})),total:cart.reduce((s,p)=>s+Number(p.price||0),0)};
+ const data={email:buyerEmail.value.trim(),mtaAccount:mtaAccount.value.trim(),characterId:characterId.value,paymentMethod:paymentMethod.value,transactionId:transactionId.value.trim(),products:cart.map(p=>({id:p.id,name:p.name,price:p.price})),total:cart.reduce((s,p)=>s+Number(p.price||0),0)};
  const msg=document.getElementById('checkoutMsg');
  try{const r=await fetch(API+'/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const d=await r.json();if(!r.ok)throw new Error(d.message||'خطأ');msg.textContent='✅ تم إرسال طلبك بنجاح. رقم الطلب: '+d.order.id;cart=[];saveCart();renderCart();}
  catch(err){msg.textContent='❌ لا يمكن إرسال الطلب الآن. تأكد أن الـBackend شغال وأن VALORIA_API مضبوط.';}
